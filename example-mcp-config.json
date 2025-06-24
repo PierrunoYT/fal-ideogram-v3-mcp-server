@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "fal-ideogram-v3": {
+      "command": "npx",
+      "args": [
+        "fal-ideogram-v3-mcp-server"
+      ],
+      "env": {
+        "FAL_KEY": "your_fal_api_key_here"
+      }
+    }
+  }
+}
