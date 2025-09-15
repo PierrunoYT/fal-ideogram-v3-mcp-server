@@ -132,7 +132,12 @@ server.tool("ideogram_v3_generate", {
                     type: "string",
                     pattern: "^[0-9A-Fa-f]{8}$"
                 },
-                description: "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style"
+                description: "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style_reference_images or style"
+            },
+            style_preset: {
+                type: "string",
+                enum: ["80S_ILLUSTRATION", "90S_NOSTALGIA", "ABSTRACT_ORGANIC", "ANALOG_NOSTALGIA", "ART_BRUT", "ART_DECO", "ART_POSTER", "AURA", "AVANT_GARDE", "BAUHAUS", "BLUEPRINT", "BLURRY_MOTION", "BRIGHT_ART", "C4D_CARTOON", "CHILDRENS_BOOK", "COLLAGE", "COLORING_BOOK_I", "COLORING_BOOK_II", "CUBISM", "DARK_AURA", "DOODLE", "DOUBLE_EXPOSURE", "DRAMATIC_CINEMA", "EDITORIAL", "EMOTIONAL_MINIMAL", "ETHEREAL_PARTY", "EXPIRED_FILM", "FLAT_ART", "FLAT_VECTOR", "FOREST_REVERIE", "GEO_MINIMALIST", "GLASS_PRISM", "GOLDEN_HOUR", "GRAFFITI_I", "GRAFFITI_II", "HALFTONE_PRINT", "HIGH_CONTRAST", "HIPPIE_ERA", "ICONIC", "JAPANDI_FUSION", "JAZZY", "LONG_EXPOSURE", "MAGAZINE_EDITORIAL", "MINIMAL_ILLUSTRATION", "MIXED_MEDIA", "MONOCHROME", "NIGHTLIFE", "OIL_PAINTING", "OLD_CARTOONS", "PAINT_GESTURE", "POP_ART", "RETRO_ETCHING", "RIVIERA_POP", "SPOTLIGHT_80S", "STYLIZED_RED", "SURREAL_COLLAGE", "TRAVEL_POSTER", "VINTAGE_GEO", "VINTAGE_POSTER", "WATERCOLOR", "WEIRD", "WOODBLOCK_PRINT"],
+                description: "Style preset for generation. The chosen style preset will guide the generation."
             },
             color_palette: {
                 type: "object",
@@ -186,7 +191,7 @@ server.tool("ideogram_v3_generate", {
                 description: "Number of images to generate",
                 default: 1,
                 minimum: 1,
-                maximum: 4
+                maximum: 8
             },
             seed: {
                 type: "integer",
@@ -195,7 +200,7 @@ server.tool("ideogram_v3_generate", {
             sync_mode: {
                 type: "boolean",
                 description: "If set to true, the function will wait for the image to be generated and uploaded before returning the response",
-                default: true
+                default: false
             }
         },
         required: ["prompt"]
@@ -211,7 +216,7 @@ server.tool("ideogram_v3_generate", {
             isError: true
         };
     }
-    const { prompt, negative_prompt = "", image_size = "square_hd", rendering_speed = "BALANCED", style, style_codes, color_palette, image_urls, expand_prompt = true, num_images = 1, seed, sync_mode = true } = args;
+    const { prompt, negative_prompt = "", image_size = "square_hd", rendering_speed = "BALANCED", style, style_codes, style_preset, color_palette, image_urls, expand_prompt = true, num_images = 1, seed, sync_mode = false } = args;
     try {
         // Validate that style and style_codes are not used together
         if (style && style_codes && style_codes.length > 0) {
@@ -238,6 +243,8 @@ server.tool("ideogram_v3_generate", {
             input.style = style;
         if (style_codes && style_codes.length > 0)
             input.style_codes = style_codes;
+        if (style_preset)
+            input.style_preset = style_preset;
         if (color_palette)
             input.color_palette = color_palette;
         if (image_urls && image_urls.length > 0)
@@ -311,6 +318,7 @@ ${negative_prompt ? `Negative Prompt: "${negative_prompt}"` : ''}
 Image Size: ${imageSizeStr}
 Rendering Speed: ${rendering_speed}
 ${style ? `Style: ${style}` : ''}
+${style_preset ? `Style Preset: ${style_preset}` : ''}
 ${style_codes && style_codes.length > 0 ? `Style Codes: ${style_codes.join(', ')}` : ''}
 ${color_palette ? `Color Palette: ${color_palette.name || 'Custom'}` : ''}
 ${image_urls && image_urls.length > 0 ? `Style Reference Images: ${image_urls.length}` : ''}
@@ -394,6 +402,10 @@ server.tool("ideogram_v3_generate_queue", {
                 type: "array",
                 items: { type: "string", pattern: "^[0-9A-Fa-f]{8}$" }
             },
+            style_preset: {
+                type: "string",
+                enum: ["80S_ILLUSTRATION", "90S_NOSTALGIA", "ABSTRACT_ORGANIC", "ANALOG_NOSTALGIA", "ART_BRUT", "ART_DECO", "ART_POSTER", "AURA", "AVANT_GARDE", "BAUHAUS", "BLUEPRINT", "BLURRY_MOTION", "BRIGHT_ART", "C4D_CARTOON", "CHILDRENS_BOOK", "COLLAGE", "COLORING_BOOK_I", "COLORING_BOOK_II", "CUBISM", "DARK_AURA", "DOODLE", "DOUBLE_EXPOSURE", "DRAMATIC_CINEMA", "EDITORIAL", "EMOTIONAL_MINIMAL", "ETHEREAL_PARTY", "EXPIRED_FILM", "FLAT_ART", "FLAT_VECTOR", "FOREST_REVERIE", "GEO_MINIMALIST", "GLASS_PRISM", "GOLDEN_HOUR", "GRAFFITI_I", "GRAFFITI_II", "HALFTONE_PRINT", "HIGH_CONTRAST", "HIPPIE_ERA", "ICONIC", "JAPANDI_FUSION", "JAZZY", "LONG_EXPOSURE", "MAGAZINE_EDITORIAL", "MINIMAL_ILLUSTRATION", "MIXED_MEDIA", "MONOCHROME", "NIGHTLIFE", "OIL_PAINTING", "OLD_CARTOONS", "PAINT_GESTURE", "POP_ART", "RETRO_ETCHING", "RIVIERA_POP", "SPOTLIGHT_80S", "STYLIZED_RED", "SURREAL_COLLAGE", "TRAVEL_POSTER", "VINTAGE_GEO", "VINTAGE_POSTER", "WATERCOLOR", "WEIRD", "WOODBLOCK_PRINT"]
+            },
             color_palette: {
                 type: "object",
                 properties: {
@@ -434,7 +446,7 @@ server.tool("ideogram_v3_generate_queue", {
                 type: "integer",
                 default: 1,
                 minimum: 1,
-                maximum: 4
+                maximum: 8
             },
             seed: {
                 type: "integer"

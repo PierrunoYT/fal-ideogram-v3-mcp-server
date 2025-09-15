@@ -1,0 +1,12 @@
+Fix API compliance and add missing features
+
+- Updated max num_images from 4 to 8 to match API specification
+- Added comprehensive style_preset parameter with 69 style options
+- Fixed sync_mode default from true to false per API docs
+- Enhanced style_codes description to include style_reference_images
+- Added style_preset handling in both generation tools
+- Added style_preset display in response formatting
+- Updated .gitignore to exclude vscode AI rules
+
+🤖 Generated with Codebuff
+Co-Authored-By: Codebuff <noreply@codebuff.com>
